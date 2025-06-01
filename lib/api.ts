@@ -24,6 +24,12 @@ export interface LoginCredentials {
   rememberMe?: boolean
 }
 
+export interface RegisterData {
+  username: string
+  email: string
+  password: string
+}
+
 export interface CreateMessageData {
   content: string
   parentId?: string
@@ -105,7 +111,7 @@ export async function loginUser(credentials: LoginCredentials): Promise<User> {
   }
 }
 
-export async function registerUser(userData: LoginCredentials & { username: string; email: string }): Promise<User> {
+export async function registerUser(userData: RegisterData): Promise<User> {
   const endpoint = `${API_BASE}/users/register`
 
   console.log("📝 Register Request:")
