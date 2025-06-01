@@ -6,11 +6,15 @@ export interface User {
   email: string
 }
 
+// Updated Message interface to match the actual API response
 export interface Message {
-  id: string
+  id: number
   content: string
-  author: User
+  username: string // Direct username instead of author object
   createdAt: string
+  lastModifiedAt: string
+  repliedToId: number | null
+  replies: Message[] | null
   replyCount?: number
 }
 
@@ -189,7 +193,7 @@ export async function fetchMessages(): Promise<Message[]> {
   }
 }
 
-export async function fetchReplies(messageId: string): Promise<Message[]> {
+export async function fetchReplies(messageId: string | number): Promise<Message[]> {
   const endpoint = `${API_BASE}/messages/${messageId}/replies`
 
   console.log("💬 Fetch Replies Request:")

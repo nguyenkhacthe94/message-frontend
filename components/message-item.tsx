@@ -25,7 +25,7 @@ export default function MessageItem({ message, level = 0, onReplyAdded }: Messag
   const { user } = useAuth()
 
   const loadReplies = async () => {
-    if (replies.length === 0) {
+    if (replies.length === 0 && !message.replies) {
       setIsLoadingReplies(true)
       try {
         const fetchedReplies = await fetchReplies(message.id)
@@ -35,6 +35,9 @@ export default function MessageItem({ message, level = 0, onReplyAdded }: Messag
       } finally {
         setIsLoadingReplies(false)
       }
+    } else if (message.replies && replies.length === 0) {
+      // Use the replies that came with the message
+      setReplies(message.replies)
     }
     setShowReplies(!showReplies)
   }
@@ -46,7 +49,7 @@ export default function MessageItem({ message, level = 0, onReplyAdded }: Messag
     try {
       const newReply = await createMessage({
         content: replyContent,
-        parentId: message.id,
+        parentId: String(message.id),
       })
 
       setReplies([...replies, newReply])
@@ -61,6 +64,9 @@ export default function MessageItem({ message, level = 0, onReplyAdded }: Messag
     }
   }
 
+  // Calculate reply count
+  const replyCount = message.replies?.length || message.replyCount || replies.length || 0
+
   const indentClass = level > 0 ? `ml-${Math.min(level * 4, 16)}` : ""
 
   return (
@@ -69,10 +75,10 @@ export default function MessageItem({ message, level = 0, onReplyAdded }: Messag
         <CardHeader className="pb-3">
           <div className="flex items-center space-x-3">
             <Avatar className="h-8 w-8">
-              <AvatarFallback>{message.author.username.charAt(0).toUpperCase()}</AvatarFallback>
+              <AvatarFallback>{message.username.charAt(0).toUpperCase()}</AvatarFallback>
             </Avatar>
             <div>
-              <p className="font-semibold text-sm">{message.author.username}</p>
+              <p className="font-semibold text-sm">{message.username}</p>
               <p className="text-xs text-gray-500">{new Date(message.createdAt).toLocaleString()}</p>
             </div>
           </div>
@@ -86,7 +92,7 @@ export default function MessageItem({ message, level = 0, onReplyAdded }: Messag
           <Button variant="ghost" size="sm" onClick={loadReplies} disabled={isLoadingReplies}>
             {showReplies ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
             <MessageCircle className="h-4 w-4 ml-1" />
-            {message.replyCount || replies.length || 0}
+            {replyCount}
           </Button>
 
           {user && (
